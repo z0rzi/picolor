@@ -72,7 +72,7 @@ void notify(const char* text) {
 
 void copyToClipboard(const char* text) {
     char command[256];
-    snprintf(command, sizeof(command), "echo '%s' | xclip -selection clipboard", text);
+    snprintf(command, sizeof(command), "echo -n '%s' | xclip -selection clipboard", text);
     system(command);
 
     notify(text);
