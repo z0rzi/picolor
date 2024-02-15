@@ -4,6 +4,7 @@
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/Xatom.h>
 
 //#include "conversion.h"
 
@@ -127,9 +128,29 @@ void printHeader(){
     printf("\n\n");
 }
 
+void copyToClipboard(const char* text) {
+    char command[256];
+    snprintf(command, sizeof(command), "echo '%s' | xclip -selection clipboard", text);
+    system(command);
+
+    snprintf(command, sizeof(command), "notify-send '%s'", text);
+    system(command);
+}
+
 void printColor(int r, int g, int b){
     if((colorMode & PREVIEW_BOX) == PREVIEW_BOX) printf("\x1b[38;2;%d;%d;%dm\u25A3\x1b[0m  ", r,g,b);
-    if((colorMode & HEX) == HEX) printf(" #%02X%02X%02X \t", r,g,b);
+
+    if((colorMode & HEX) == HEX) {
+        // storing color in a string
+        char color[8];
+        sprintf(color, "#%02X%02X%02X", r, g, b);
+        // printing color
+        printf(" %s \t", color);
+
+        // Copy to clipboard
+        copyToClipboard(color);
+    }
+
     if((colorMode & RGB) == RGB) printf(" %3d %3d %3d \t", r,g,b);
     printf("\n");
 }
@@ -139,7 +160,6 @@ void saveColor(int r, int g, int b){
     static unsigned int nb_saved = 0;
     if(nb_saved==0) printHeader();
     printColor(r, g, b);
-    //printf("\x1b[38;2;%d;%d;%dm\u25A3\x1b[0m   #%02X%02X%02X \t %3d %3d %3d\n", r, g, b, r, g, b, r, g, b);
     nb_saved++;
 }
 
@@ -198,6 +218,7 @@ void loopWindow(struct x11_data * data) {
             else if (key == XK_Control_L || key == XK_Control_R) {   // CTL key press
                 // Handle selected color
                 saveColor(data->c.red / 256, data->c.green / 256, data->c.blue / 256);
+                break;
             }
 
         }
