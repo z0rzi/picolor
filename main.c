@@ -64,9 +64,25 @@ void parseArgs(int argc, char ** argv) {
     }
 }
 
+void notify(const char* text) {
+    char command[256];
+    snprintf(command, sizeof(command), "notify-send '%s'", text);
+    system(command);
+}
+
+void copyToClipboard(const char* text) {
+    char command[256];
+    snprintf(command, sizeof(command), "echo '%s' | xclip -selection clipboard", text);
+    system(command);
+
+    notify(text);
+}
+
+
 int main(int argc, char ** argv) {
 
     printf("----------- Picolor-v0.1.0 -----------\n\n");
+    notify("`ctrl` to pick color");
     // Init Display
     struct x11_data display_data;
     display_data.display = XOpenDisplay(NULL);
@@ -126,15 +142,6 @@ void printHeader(){
     if((colorMode & HEX) == HEX) printf("   HEX   \t");
     if((colorMode & RGB) == RGB) printf("     RGB    \t");
     printf("\n\n");
-}
-
-void copyToClipboard(const char* text) {
-    char command[256];
-    snprintf(command, sizeof(command), "echo '%s' | xclip -selection clipboard", text);
-    system(command);
-
-    snprintf(command, sizeof(command), "notify-send '%s'", text);
-    system(command);
 }
 
 void printColor(int r, int g, int b){
